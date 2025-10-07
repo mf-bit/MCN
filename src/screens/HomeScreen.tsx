@@ -1,0 +1,432 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  Animated,
+  TextInput,
+} from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Artifact } from '../types/Artifact';
+import { artifacts as allArtifacts } from '../data/artifacts';
+import { RootStackParamList } from '../../App';
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
+interface Props {
+  navigation: HomeScreenNavigationProp;
+}
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width - 32;
+
+const categories = [
+  { id: 'all', name: 'All' },
+  { id: 'paintings', name: 'Paintings' },
+  { id: 'tapestries', name: 'Tapestries' },
+  { id: 'sculptures', name: 'Sculptures' },
+  { id: 'photos', name: 'Photos' },
+];
+
+export default function HomeScreen({ navigation }: Props) {
+  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    loadArtifacts();
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    if (artifacts.length === 0) return;
+
+    const interval = setInterval(() => {
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0.3,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % artifacts.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [artifacts.length]);
+
+  const loadArtifacts = () => {
+    let filteredArtifacts = allArtifacts;
+
+    if (selectedCategory !== 'all') {
+      filteredArtifacts = allArtifacts.filter(
+        artifact => artifact.category === selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)
+      );
+    }
+
+    setArtifacts(filteredArtifacts);
+    setCurrentIndex(0);
+  };
+
+  const currentArtifact = artifacts[currentIndex];
+
+  return (
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Hello, Medoune</Text>
+            <Text style={styles.subtitle}>Welcome to Museum of Black Civilisations</Text>
+          </View>
+          <View style={styles.profilePic}>
+            <Text style={styles.profileText}>M</Text>
+          </View>
+        </View>
+
+        <Text style={styles.title}>A Continuous Creation of{'\n'}Humanity</Text>
+
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              placeholder="Search"
+              placeholderTextColor="#999"
+              style={styles.searchInput}
+            />
+          </View>
+          <TouchableOpacity style={styles.filterButton}>
+            <Text style={styles.filterIcon}>⚙️</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryScroll}
+          contentContainerStyle={styles.categoryContent}
+        >
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.categoryButton,
+                selectedCategory === cat.id && styles.categoryButtonActive,
+              ]}
+              onPress={() => setSelectedCategory(cat.id)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === cat.id && styles.categoryTextActive,
+                ]}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {currentArtifact && (
+          <Animated.View style={[styles.carouselContainer, { opacity: fadeAnim }]}>
+            <View style={styles.card}>
+              <Image
+                source={currentArtifact.image_url}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.9)']}
+                style={styles.cardGradient}
+              >
+                <View style={styles.cardContent}>
+                  <TouchableOpacity style={styles.heartButton}>
+                    <Text style={styles.heartIcon}>❤️</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.cardOrigin}>{currentArtifact.origin}</Text>
+                  <Text style={styles.cardTitle}>{currentArtifact.name}</Text>
+                  <Text style={styles.cardPeriod}>{currentArtifact.period}</Text>
+                  <TouchableOpacity
+                    style={styles.seeMoreButton}
+                    onPress={() =>
+                      navigation.navigate('ArtifactListing', {
+                        category: selectedCategory,
+                      })
+                    }
+                  >
+                    <Text style={styles.seeMoreText}>See more</Text>
+                    <Text style={styles.arrowIcon}>→</Text>
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            </View>
+
+            <View style={styles.dotsContainer}>
+              {artifacts.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    index === currentIndex && styles.dotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          </Animated.View>
+        )}
+      </ScrollView>
+
+      <View style={styles.navbar}>
+        <TouchableOpacity style={styles.navButtonActive}>
+          <Text style={styles.navIcon}>🏠</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <Text style={styles.navIcon}>❤️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <Text style={styles.navIcon}>📷</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton}>
+          <Text style={styles.navIcon}>🏛️</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  profilePic: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#e67e22',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#000',
+    marginVertical: 20,
+    paddingHorizontal: 16,
+    lineHeight: 36,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 12,
+  },
+  searchIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000',
+  },
+  filterButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterIcon: {
+    fontSize: 20,
+  },
+  categoryScroll: {
+    marginBottom: 20,
+  },
+  categoryContent: {
+    paddingHorizontal: 16,
+  },
+  categoryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    marginRight: 8,
+  },
+  categoryButtonActive: {
+    backgroundColor: '#000',
+  },
+  categoryText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  categoryTextActive: {
+    color: '#fff',
+  },
+  carouselContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  card: {
+    width: CARD_WIDTH,
+    height: 420,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '60%',
+    justifyContent: 'flex-end',
+  },
+  cardContent: {
+    padding: 24,
+  },
+  heartButton: {
+    position: 'absolute',
+    top: -300,
+    right: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heartIcon: {
+    fontSize: 20,
+  },
+  cardOrigin: {
+    fontSize: 12,
+    color: '#fff',
+    marginBottom: 4,
+    opacity: 0.9,
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  cardPeriod: {
+    fontSize: 12,
+    color: '#ddd',
+    marginBottom: 16,
+  },
+  seeMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignSelf: 'flex-start',
+  },
+  seeMoreText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000',
+    marginRight: 8,
+  },
+  arrowIcon: {
+    fontSize: 16,
+    color: '#000',
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+    marginHorizontal: 4,
+  },
+  dotActive: {
+    backgroundColor: '#000',
+    width: 24,
+  },
+  navbar: {
+    flexDirection: 'row',
+    backgroundColor: '#000',
+    borderRadius: 30,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    justifyContent: 'space-around',
+  },
+  navButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  navButtonActive: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 8,
+  },
+  navIcon: {
+    fontSize: 24,
+  },
+});
