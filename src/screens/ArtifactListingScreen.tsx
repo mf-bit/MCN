@@ -80,6 +80,11 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.container}>
+      {/* Bouton de retour */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backIcon}>← Retour</Text>
+      </TouchableOpacity>
+      {/* Contenu existant */}
       <View style={styles.topBar}>
         <Text style={styles.logo}>mcn</Text>
         <TouchableOpacity style={styles.searchButton}>
@@ -133,18 +138,30 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
 
       <View style={styles.navbar}>
         <TouchableOpacity
-          style={styles.navButtonActive}
+          style={styles.navButton}
           onPress={() => navigation.navigate('Home')}
         >
           <Text style={styles.navIcon}>🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => navigation.navigate('Favorites')}
+        >
           <Text style={styles.navIcon}>❤️</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => {
+            // Menu d'options pour QR, upload, ou photo
+            console.log('Options scan/upload/photo');
+          }}
+        >
           <Text style={styles.navIcon}>📷</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => navigation.navigate('Museum3D')}
+        >
           <Text style={styles.navIcon}>🏛️</Text>
         </TouchableOpacity>
       </View>
@@ -300,5 +317,15 @@ const styles = StyleSheet.create({
   },
   navIcon: {
     fontSize: 24,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 16,
+    zIndex: 1000,
+  },
+  backIcon: {
+    fontSize: 16,
+    color: '#000',
   },
 });
