@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { GriotIcon, BackIcon } from '../components/icons';
+import { Audio } from 'expo-av';
 
 type GriotScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -67,6 +68,11 @@ export default function GriotScreen() {
   const navigation = useNavigation<GriotScreenNavigationProp>();
   const [selectedGriot, setSelectedGriot] = useState<any>(null);
   const [animatedGriots, setAnimatedGriots] = useState(griotCharacters);
+  const [speakingGriotId, setSpeakingGriotId] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // Animation values for floating effect
   const floatingAnimations = useRef(
@@ -94,6 +100,49 @@ export default function GriotScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    return () => { if (soundRef.current) { soundRef.current.unloadAsync(); } };
+  }, []);
+
+  const togglePlayForGriot = async (griot: any) => {
+    try {
+      if (!soundRef.current || speakingGriotId !== griot.id) {
+        if (soundRef.current) {
+          await soundRef.current.unloadAsync();
+          soundRef.current = null;
+        }
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4d/Short_swahili_drums_sample.ogg/Short_swahili_drums_sample.ogg.mp3' },
+          { shouldPlay: true },
+          (status) => {
+            if ('isLoaded' in status && status.isLoaded) {
+              setIsPlaying(!!status.isPlaying);
+              setPosition(status.positionMillis ?? 0);
+              setDuration(status.durationMillis ?? 0);
+            }
+          }
+        );
+        soundRef.current = sound;
+        setSpeakingGriotId(griot.id);
+        setIsPlaying(true);
+        return;
+      }
+
+      const status = await soundRef.current.getStatusAsync();
+      if ('isLoaded' in status && status.isLoaded) {
+        if (status.isPlaying) {
+          await soundRef.current.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await soundRef.current.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Griot audio error', e);
+    }
+  };
+
   const FloatingGriot = ({ griot, index }: { griot: any; index: number }) => {
     const translateY = floatingAnimations[index].interpolate({
       inputRange: [0, 1],
@@ -117,7 +166,11 @@ export default function GriotScreen() {
         ]}
       >
         <TouchableOpacity
-          style={[styles.griotAvatar, { backgroundColor: griot.color }]}
+          style={[
+            styles.griotAvatar,
+            { backgroundColor: griot.color },
+            speakingGriotId === griot.id && styles.griotSpeaking,
+          ]}
           onPress={() => setSelectedGriot(griot)}
         >
           <GriotIcon size={32} color={colors.neutral.white} />
@@ -130,7 +183,7 @@ export default function GriotScreen() {
   };
 
   const GriotCard = ({ griot }: { griot: any }) => (
-    <View style={[styles.griotCard, { borderLeftColor: griot.color }]}>
+    <View style={[styles.griotCard, { borderLeftColor: griot.color }]}> 
       <View style={styles.griotCardHeader}>
         <View style={[styles.griotCardAvatar, { backgroundColor: griot.color }]}>
           <GriotIcon size={24} color={colors.neutral.white} />
@@ -141,8 +194,13 @@ export default function GriotScreen() {
         </View>
       </View>
       <Text style={styles.griotCardSpecialty}>Specialty: {griot.specialty}</Text>
-      <TouchableOpacity style={[styles.listenButton, { backgroundColor: griot.color }]}>
-        <Text style={styles.listenButtonText}>Listen to Stories</Text>
+      <TouchableOpacity
+        style={[styles.listenButton, { backgroundColor: griot.color }]}
+        onPress={() => togglePlayForGriot(griot)}
+      >
+        <Text style={styles.listenButtonText}>
+          {speakingGriotId === griot.id && isPlaying ? 'Pause' : 'Listen to History'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -157,7 +215,7 @@ export default function GriotScreen() {
         >
           <BackIcon size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Meet the Griots</Text>
+        <Text style={styles.headerTitle}>Rencontre avec les griots</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -168,88 +226,83 @@ export default function GriotScreen() {
         <View style={styles.patternCircle3} />
       </View>
 
-      {/* Floating Griots */}
-      {animatedGriots.map((griot, index) => (
+      {/* Floating Griots selection (hidden after selection) */}
+      {!selectedGriot && animatedGriots.map((griot, index) => (
         <FloatingGriot key={griot.id} griot={griot} index={index} />
       ))}
 
-      {/* Content */}
+      {/* Content: either pick a griot or see his stories */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Welcome to the Griot Circle</Text>
-          <Text style={styles.welcomeDescription}>
-            Tap on the floating griots to hear their stories, or explore our collection of traditional storytellers.
-          </Text>
-        </View>
-
-        {/* Selected Griot */}
-        {selectedGriot && (
-          <View style={styles.selectedGriotSection}>
-            <Text style={styles.sectionTitle}>Selected Griot</Text>
-            <GriotCard griot={selectedGriot} />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setSelectedGriot(null)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+        {!selectedGriot && (
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeTitle}>Choisis un griot pour écouter ses histoires</Text>
+            <Text style={styles.welcomeDescription}>Appuie sur un avatar flottant</Text>
           </View>
         )}
 
-        {/* All Griots */}
-        <View style={styles.allGriotsSection}>
-          <Text style={styles.sectionTitle}>All Griots</Text>
-          <View style={styles.griotsGrid}>
-            {griotCharacters.map((griot) => (
-              <GriotCard key={griot.id} griot={griot} />
-            ))}
-          </View>
-        </View>
+        {selectedGriot && (
+          <View style={styles.selectedGriotSection}>
+            <View style={[styles.griotCard, { borderLeftColor: selectedGriot.color }]}> 
+              <View style={styles.griotCardHeader}>
+                <View style={[styles.griotCardAvatar, { backgroundColor: selectedGriot.color }]}> 
+                  <GriotIcon size={24} color={colors.neutral.white} />
+                </View>
+                <View style={styles.griotCardInfo}>
+                  <Text style={styles.griotCardName}>{selectedGriot.name}</Text>
+                  <Text style={styles.griotCardOrigin}>{selectedGriot.origin}</Text>
+                </View>
+              </View>
+              <Text style={styles.griotCardSpecialty}>Histoires du griot</Text>
 
-        {/* Features */}
-        <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Griot Features</Text>
-          <View style={styles.featuresList}>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Text style={styles.featureIconText}>📚</Text>
+              {/* Stories list for the selected griot */}
+              <View style={styles.featuresList}>
+                {[1,2,3].map((n) => (
+                  <View key={n} style={styles.featureItem}>
+                    <View style={styles.featureIcon}><Text style={styles.featureIconText}>🎧</Text></View>
+                    <View style={styles.featureContent}>
+                      <Text style={styles.featureTitle}>Histoire {n}</Text>
+                      <Text style={styles.featureDescription}>3:0{n} • {selectedGriot.specialty}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.listenButton, { backgroundColor: selectedGriot.color }]}
+                      onPress={() => togglePlayForGriot(selectedGriot)}
+                    >
+                      <Text style={styles.listenButtonText}>{speakingGriotId === selectedGriot.id && isPlaying ? 'Pause' : 'Écouter'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
               </View>
-              <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>Historical Narratives</Text>
-                <Text style={styles.featureDescription}>
-                  Listen to authentic stories from African civilizations
-                </Text>
-              </View>
-            </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Text style={styles.featureIconText}>🎭</Text>
-              </View>
-              <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>Art Interpretations</Text>
-                <Text style={styles.featureDescription}>
-                  Learn the cultural significance of artifacts
-                </Text>
-              </View>
-            </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Text style={styles.featureIconText}>🌍</Text>
-              </View>
-              <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>Cultural Context</Text>
-                <Text style={styles.featureDescription}>
-                  Understand traditions and customs of different empires
-                </Text>
-              </View>
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setSelectedGriot(null)}
+              >
+                <Text style={styles.closeButtonText}>Changer de griot</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
+        )}
 
-        {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Mini Player */}
+      {!!speakingGriotId && (
+        <View style={styles.playerBar}>
+          <View style={[styles.playerBadge, { backgroundColor: (griotCharacters.find(g => g.id === speakingGriotId)?.color) || colors.primary[500] }]}>
+            <Text style={styles.playerBadgeText}>Now playing</Text>
+          </View>
+          <View style={styles.playerProgress}>
+            <View style={[styles.playerFill, { width: `${duration ? Math.min(100, Math.round((position / duration) * 100)) : 0}%` }]} />
+          </View>
+          <TouchableOpacity style={styles.playerBtn} onPress={() => {
+            const current = griotCharacters.find(g => g.id === speakingGriotId);
+            if (current) togglePlayForGriot(current);
+          }}>
+            <Text style={styles.playerBtnText}>{isPlaying ? 'Pause' : 'Play'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -331,6 +384,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.md,
+  },
+  griotSpeaking: {
+    shadowColor: colors.primary[500],
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
   },
   griotNameTag: {
     marginTop: spacing[2],
@@ -491,6 +550,50 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: spacing[20],
+  },
+  playerBar: {
+    position: 'absolute',
+    left: spacing[4],
+    right: spacing[4],
+    bottom: spacing[4],
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius['3xl'],
+    padding: spacing[3],
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shadows.md,
+  },
+  playerBadge: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius['3xl'],
+    marginRight: spacing[3],
+  },
+  playerBadgeText: {
+    color: colors.neutral.white,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  playerProgress: {
+    flex: 1,
+    height: 6,
+    backgroundColor: colors.neutral.gray[200],
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  playerFill: {
+    height: '100%',
+    backgroundColor: colors.primary[500],
+  },
+  playerBtn: {
+    marginLeft: spacing[3],
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.md,
+  },
+  playerBtnText: {
+    color: colors.neutral.white,
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 

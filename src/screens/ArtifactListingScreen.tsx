@@ -12,6 +12,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useI18n } from '../utils/i18n';
 import { Artifact } from '../types/Artifact';
 import { artifacts as allArtifacts } from '../data/artifacts';
 import { RootStackParamList } from '../../App';
@@ -42,6 +43,7 @@ const categories = [
 export default function ArtifactListingScreen({ navigation, route }: Props) {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(route.params.category || 'all');
+  const { t } = useI18n();
 
   useEffect(() => {
     loadArtifacts();
@@ -90,8 +92,12 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
         <TouchableOpacity style={styles.searchButton}>
           <Text style={styles.searchIcon}>🔍</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton}>
-          <Text style={styles.shareText}>share</Text>
+        <TouchableOpacity style={styles.shareButton} onPress={() => navigation.navigate('QRScan' as never)}>
+          <Text style={styles.shareText}>Scan QR</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={[styles.shareButton, { marginLeft: 8 }]} onPress={() => navigation.navigate('ARNavigation' as never)}>
+          <Text style={styles.shareText}>AR Nav</Text>
         </TouchableOpacity>
       </View>
 

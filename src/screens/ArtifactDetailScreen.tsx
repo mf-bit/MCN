@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -6,6 +6,9 @@ import { RootStackParamList } from '../../App';
 import { Artifact } from '../types/Artifact';
 import GriotChat from '../components/GriotChat';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
+import { BackIcon, ShareIcon, GriotIcon, AudioIcon, ARIcon, HeartIcon } from '../components/icons';
+import { Audio, Video } from 'expo-av';
+import { useFavorites } from '../utils/favorites';
 
 // Props pour la navigation
 interface Props {
@@ -18,6 +21,50 @@ export default function ArtifactDetailScreen({ route }: Props) {
   const { artifact } = route.params as { artifact: Artifact };
   const [selectedLang, setSelectedLang] = useState<'wolof' | 'fr' | 'en'>('fr');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    return () => { if (soundRef.current) { soundRef.current.unloadAsync(); } };
+  }, []);
+
+  const togglePlay = async () => {
+    try {
+      if (!soundRef.current) {
+        const { sound } = await Audio.Sound.createAsync(
+          // Placeholder local asset: reuse any small png path would fail; so skip until real audio provided
+          // For demo, load a remote short mp3 sample
+          { uri: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4d/Short_swahili_drums_sample.ogg/Short_swahili_drums_sample.ogg.mp3' },
+          { shouldPlay: true },
+          (status) => {
+            if (status.isLoaded) {
+              setIsPlaying(status.isPlaying ?? false);
+              const ratio = status.durationMillis ? (status.positionMillis ?? 0) / status.durationMillis : 0;
+              setProgress(ratio);
+            }
+          }
+        );
+        soundRef.current = sound;
+        setIsPlaying(true);
+        return;
+      }
+
+      const status = await soundRef.current.getStatusAsync();
+      if ('isLoaded' in status && status.isLoaded) {
+        if (status.isPlaying) {
+          await soundRef.current.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await soundRef.current.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Audio error', e);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -27,10 +74,10 @@ export default function ArtifactDetailScreen({ route }: Props) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon size={20} color={colors.text.primary} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.shareButton}>
-          <Text style={styles.shareIcon}>↗</Text>
+          <ShareIcon size={20} color={colors.text.primary} />
         </TouchableOpacity>
       </View>
 
@@ -50,14 +97,48 @@ export default function ArtifactDetailScreen({ route }: Props) {
         </View>
       </View>
 
-      {/* Artifact Image - Full width */}
+      {/* Artifact Image - Full width + like */}
       <View style={styles.imageContainer}>
         <Image source={artifact.image_url} style={styles.artifactImage} resizeMode="cover" />
+        <TouchableOpacity style={styles.likeBtn} onPress={() => toggleFavorite(artifact.id)}>
+          <HeartIcon size={22} color={colors.neutral.white} filled={isFavorite(artifact.id)} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Media Tabs */}
+      <View style={styles.mediaTabs}>
+        <Text style={styles.mediaTabActive}>Vidéo</Text>
+        <Text style={styles.mediaTab}>Texte</Text>
+        <Text style={styles.mediaTab}>Images</Text>
+      </View>
+
+      {/* Video Player */}
+      <View style={styles.videoSection}>
+        <Video
+          source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
+          style={styles.video}
+          useNativeControls
+          resizeMode="contain"
+        />
       </View>
 
       {/* Description - Centered */}
       <View style={styles.descriptionSection}>
         <Text style={styles.description}>{artifact.description}</Text>
+      </View>
+
+      {/* Audio Player */}
+      <View style={styles.audioSection}>
+        <Text style={styles.sectionTitle}>Description audio</Text>
+        <View style={styles.audioCard}>
+          <TouchableOpacity style={styles.playBtn} onPress={togglePlay}>
+            <AudioIcon size={20} color={colors.neutral.white} />
+            <Text style={styles.playBtnText}>{isPlaying ? 'Pause' : 'Play'}</Text>
+          </TouchableOpacity>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+          </View>
+        </View>
       </View>
 
       {/* Map Section */}
@@ -73,7 +154,7 @@ export default function ArtifactDetailScreen({ route }: Props) {
 
       {/* Historical Background Section */}
       <View style={styles.historicalSection}>
-        <Text style={styles.sectionTitle}>Historical Background</Text>
+        <Text style={styles.sectionTitle}>Contexte historique</Text>
         <Text style={styles.historicalText}>
           Cette œuvre provient de l'ancien {artifact.origin}, un royaume riche en traditions artistiques et culturelles. 
           Elle témoigne de la maîtrise technique et de la signification spirituelle de l'art de cette période.
@@ -86,7 +167,7 @@ export default function ArtifactDetailScreen({ route }: Props) {
         <View style={styles.optionsGrid}>
           <TouchableOpacity style={styles.optionCard}>
             <View style={styles.optionIconContainer}>
-              <Text style={styles.optionIcon}>🎭</Text>
+              <GriotIcon size={24} color={colors.primary[600]} />
             </View>
             <Text style={styles.optionTitle}>Griot</Text>
             <Text style={styles.optionSubtitle}>Écouter l'histoire</Text>
@@ -94,26 +175,26 @@ export default function ArtifactDetailScreen({ route }: Props) {
           
           <TouchableOpacity style={styles.optionCard}>
             <View style={styles.optionIconContainer}>
-              <Text style={styles.optionIcon}>🔊</Text>
+              <AudioIcon size={24} color={colors.primary[600]} />
             </View>
             <Text style={styles.optionTitle}>Audio</Text>
             <Text style={styles.optionSubtitle}>Commentaire audio</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.optionCard}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('HistoryTimeline' as never, { artifactName: artifact.name } as never)}>
             <View style={styles.optionIconContainer}>
-              <Text style={styles.optionIcon}>📍</Text>
+              <ARIcon size={24} color={colors.primary[600]} />
             </View>
-            <Text style={styles.optionTitle}>Localisation</Text>
-            <Text style={styles.optionSubtitle}>Voir au musée</Text>
+            <Text style={styles.optionTitle}>Timeline</Text>
+            <Text style={styles.optionSubtitle}>Voir le contexte</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.optionCard}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('Artwork3D' as never)}>
             <View style={styles.optionIconContainer}>
-              <Text style={styles.optionIcon}>🎵</Text>
+              <AudioIcon size={24} color={colors.primary[600]} />
             </View>
-            <Text style={styles.optionTitle}>Musique</Text>
-            <Text style={styles.optionSubtitle}>Ambiance</Text>
+            <Text style={styles.optionTitle}>Voir en 3D</Text>
+            <Text style={styles.optionSubtitle}>Rotation, zoom</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -255,6 +336,17 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: colors.neutral.gray[100],
   },
+  likeBtn: {
+    position: 'absolute',
+    right: spacing[3],
+    top: spacing[3],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   
   // Description Section - Centered like in Figma
   descriptionSection: {
@@ -262,12 +354,72 @@ const styles = StyleSheet.create({
     marginBottom: spacing[8],
     alignItems: 'center',
   },
+  mediaTabs: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing[4],
+    marginBottom: spacing[3],
+  },
+  mediaTabActive: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+  },
+  mediaTab: {
+    color: colors.text.secondary,
+  },
+  videoSection: {
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[4],
+  },
+  video: {
+    width: width - spacing[8],
+    height: 220,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.neutral.black,
+  },
   description: {
     fontSize: typography.fontSize.base,
     lineHeight: typography.lineHeight.relaxed * typography.fontSize.base,
     color: colors.text.primary,
     textAlign: 'center',
     maxWidth: width * 0.8, // Limit width for better readability
+  },
+
+  // Audio
+  audioSection: {
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[8],
+  },
+  audioCard: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius.lg,
+    padding: spacing[4],
+    ...shadows.sm,
+  },
+  playBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primary[500],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+    marginBottom: spacing[3],
+  },
+  playBtnText: {
+    color: colors.neutral.white,
+    marginLeft: spacing[2],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: colors.neutral.gray[200],
+    borderRadius: borderRadius.full / 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.primary[500],
   },
   
   // Map Section

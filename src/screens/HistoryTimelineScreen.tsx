@@ -73,6 +73,14 @@ interface Props {
 export default function HistoryTimelineScreen({ navigation, route }: Props) {
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
 
+  // If an artifact name is passed in params, preselect the most relevant event
+  const artifactName = (route.params as any)?.artifactName as string | undefined;
+  React.useEffect(() => {
+    if (!artifactName) return;
+    const idx = timelineEvents.findIndex(ev => ev.artifacts.some((a: string) => a.toLowerCase().includes(artifactName.toLowerCase())));
+    if (idx >= 0) setSelectedEvent(timelineEvents[idx].id);
+  }, [artifactName]);
+
   const TimelineEvent = ({ event, isLast }: { event: any; isLast: boolean }) => (
     <View style={styles.timelineItem}>
       <View style={styles.timelineLeft}>

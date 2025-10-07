@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
-
-const griotAvatar = require('../../assets/artifacts/benin-mask.png');
+import { AudioIcon } from './icons';
+import { useI18n } from '../utils/i18n';
 
 export default function GriotChat() {
+  const { t } = useI18n();
   const [messages, setMessages] = useState([
-    { from: 'griot', text: 'Bonjour, je suis ton griot. Pose-moi une question ou écoute mon histoire !' },
+    { from: 'griot', text: t('hello') + ', ' + t('griot') },
   ]);
   const [input, setInput] = useState('');
 
@@ -21,30 +22,33 @@ export default function GriotChat() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Image source={griotAvatar} style={styles.avatarImage} resizeMode="contain" />
+          <Image source={require('../../assets/artifacts/benin-mask.png')} style={styles.avatarImage} resizeMode="cover" />
         </View>
-        <Text style={styles.title}>Griot</Text>
+        <View>
+          <Text style={styles.title}>Griot</Text>
+          <Text style={styles.subtitle}>Le conteur virtuel</Text>
+        </View>
       </View>
-      <View style={styles.messages}>
+      <ScrollView style={styles.messages} showsVerticalScrollIndicator={false}>
         {messages.map((msg, idx) => (
           <View key={idx} style={[styles.message, msg.from === 'griot' ? styles.griotMsg : styles.userMsg]}>
-            <Text>{msg.text}</Text>
+            <Text style={styles.messageText}>{msg.text}</Text>
           </View>
         ))}
-      </View>
+      </ScrollView>
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Écris au griot..."
+          placeholder={t('writeToGriot')}
         />
         <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
           <Text style={styles.sendBtnText}>Envoyer</Text>
         </TouchableOpacity>
         {/* Bouton audio pour envoyer un message vocal (à intégrer plus tard) */}
         <TouchableOpacity style={styles.audioBtn}>
-          <Text style={styles.audioBtnText}>🎤</Text>
+          <AudioIcon size={18} color={colors.text.primary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -53,7 +57,7 @@ export default function GriotChat() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.neutral.white,
     borderRadius: borderRadius.lg,
     padding: spacing[4],
     ...shadows.sm,
@@ -83,8 +87,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.lg,
     color: colors.text.primary,
   },
+  subtitle: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+  },
   messages: {
-    maxHeight: 120,
+    maxHeight: 160,
     marginBottom: spacing[3],
   },
   message: {
@@ -92,14 +100,20 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     marginBottom: spacing[2],
     maxWidth: '80%',
+    ...shadows.sm,
   },
   griotMsg: {
     backgroundColor: colors.primary[100],
     alignSelf: 'flex-start',
   },
   userMsg: {
-    backgroundColor: colors.secondary[100],
+    backgroundColor: colors.primary[200],
     alignSelf: 'flex-end',
+  },
+  messageText: {
+    color: colors.text.primary,
+    fontSize: typography.fontSize.sm,
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
   },
   inputRow: {
     flexDirection: 'row',

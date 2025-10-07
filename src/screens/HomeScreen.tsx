@@ -16,6 +16,9 @@ import { Artifact } from '../types/Artifact';
 import { artifacts as allArtifacts } from '../data/artifacts';
 import { RootStackParamList } from '../../App';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
+import GriotAvatar from '../components/GriotAvatar';
+import HamburgerMenu from '../components/HamburgerMenu';
+import { useI18n } from '../utils/i18n';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -38,7 +41,9 @@ export default function HomeScreen({ navigation }: Props) {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [query, setQuery] = useState('');
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const { t } = useI18n();
 
   useEffect(() => {
     loadArtifacts();
@@ -76,6 +81,14 @@ export default function HomeScreen({ navigation }: Props) {
       );
     }
 
+    if (query.trim().length > 0) {
+      const q = query.trim().toLowerCase();
+      filteredArtifacts = filteredArtifacts.filter(a =>
+        a.name.toLowerCase().includes(q) ||
+        a.origin.toLowerCase().includes(q)
+      );
+    }
+
     setArtifacts(filteredArtifacts);
     setCurrentIndex(0);
   };
@@ -90,9 +103,7 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.greeting}>Hello, Medoune</Text>
             <Text style={styles.subtitle}>Welcome to Museum of Black Civilisations</Text>
           </View>
-          <View style={styles.profilePic}>
-            <Text style={styles.profileText}>M</Text>
-          </View>
+          <HamburgerMenu onNavigate={(route) => navigation.navigate(route as never)} />
         </View>
 
         <Text style={styles.title}>A Continuous Creation of{'\n'}Humanity</Text>
@@ -101,9 +112,12 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.searchBar}>
             <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
-              placeholder="Search"
+              placeholder={t('searchPlaceholder')}
               placeholderTextColor="#999"
               style={styles.searchInput}
+              value={query}
+              onChangeText={(text) => { setQuery(text); }}
+              onEndEditing={loadArtifacts}
             />
           </View>
           <TouchableOpacity style={styles.filterButton}>
@@ -185,6 +199,23 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </Animated.View>
         )}
+
+        {/* Floating Griot avatars linking to griot page */}
+        <View style={styles.griotRow}>
+          {[colors.primary[500], colors.accent.terracotta, colors.accent.bronze].map((c, i) => (
+            <GriotAvatar key={i} color={c} size={56} onPress={() => navigation.navigate('Griot' as never)} />
+          ))}
+        </View>
+
+        {/* Quick actions: 3D Museum, Reserve Visit */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 16, marginBottom: 32 }}>
+          <TouchableOpacity style={{ backgroundColor: '#000', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 18 }} onPress={() => navigation.navigate('Museum3D' as never)}>
+            <Text style={{ color: '#fff' }}>Museum 3D</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ backgroundColor: colors.primary[500], borderRadius: 24, paddingVertical: 12, paddingHorizontal: 18 }} onPress={() => navigation.navigate('ReserveVisit' as never)}>
+            <Text style={{ color: '#fff' }}>Reserve visit</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
     </View>
@@ -388,6 +419,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 16,
+  },
+  griotRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: spacing[6],
+    marginTop: spacing[6],
+    marginBottom: spacing[10],
   },
   dot: {
     width: 8,

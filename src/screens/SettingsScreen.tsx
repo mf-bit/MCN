@@ -13,11 +13,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { SettingsIcon, BackIcon } from '../components/icons';
+import { useI18n } from '../utils/i18n';
 
 type SettingsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
+  const { lang, setLang, t } = useI18n();
   
   const [settings, setSettings] = useState({
     notifications: true,
@@ -119,7 +121,7 @@ export default function SettingsScreen() {
         >
           <BackIcon size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerTitle}>{t('settings')}</Text>
         <View style={styles.placeholder} />
       </View>
 
