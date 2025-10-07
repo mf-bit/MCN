@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Artifact } from '../types/Artifact';
 import { artifacts as allArtifacts } from '../data/artifacts';
 import { RootStackParamList } from '../../App';
+import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -186,20 +187,6 @@ export default function HomeScreen({ navigation }: Props) {
         )}
       </ScrollView>
 
-      <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navButtonActive}>
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>❤️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>📷</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>🏛️</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -207,7 +194,7 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
@@ -216,100 +203,109 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[16],
+    paddingBottom: spacing[5],
   },
   greeting: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginTop: spacing[1],
+    fontWeight: typography.fontWeight.medium,
   },
   profilePic: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#e67e22',
+    borderRadius: borderRadius.full / 2,
+    backgroundColor: colors.primary[500],
     justifyContent: 'center',
     alignItems: 'center',
+    ...shadows.sm,
   },
   profileText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral.white,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
     textAlign: 'center',
-    color: '#000',
-    marginVertical: 20,
-    paddingHorizontal: 16,
-    lineHeight: 36,
+    color: colors.text.primary,
+    marginVertical: spacing[5],
+    paddingHorizontal: spacing[4],
+    lineHeight: typography.lineHeight.tight * typography.fontSize['3xl'],
   },
   searchContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[4],
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 12,
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius['3xl'],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    marginRight: spacing[3],
+    ...shadows.sm,
   },
   searchIcon: {
-    fontSize: 18,
-    marginRight: 8,
+    fontSize: typography.fontSize.lg,
+    marginRight: spacing[2],
+    color: colors.text.tertiary,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#000',
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
   },
   filterButton: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#000',
+    borderRadius: borderRadius['3xl'],
+    backgroundColor: colors.secondary[800],
     justifyContent: 'center',
     alignItems: 'center',
+    ...shadows.sm,
   },
   filterIcon: {
-    fontSize: 20,
+    fontSize: typography.fontSize.xl,
+    color: colors.neutral.white,
   },
   categoryScroll: {
-    marginBottom: 20,
+    marginBottom: spacing[5],
   },
   categoryContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing[4],
   },
   categoryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    marginRight: 8,
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius['3xl'],
+    backgroundColor: colors.neutral.white,
+    marginRight: spacing[2],
+    ...shadows.sm,
   },
   categoryButtonActive: {
-    backgroundColor: '#000',
+    backgroundColor: colors.primary[500],
   },
   categoryText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
   },
   categoryTextActive: {
-    color: '#fff',
+    color: colors.neutral.white,
+    fontWeight: typography.fontWeight.semibold,
   },
   carouselContainer: {
     paddingHorizontal: 16,
@@ -403,30 +399,5 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: '#000',
     width: 24,
-  },
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#000',
-    borderRadius: 30,
-    marginHorizontal: 16,
-    marginBottom: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    justifyContent: 'space-around',
-  },
-  navButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  navButtonActive: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingVertical: 8,
-  },
-  navIcon: {
-    fontSize: 24,
   },
 });

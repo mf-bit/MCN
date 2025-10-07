@@ -60,7 +60,7 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
   };
 
   const renderArtifact = ({ item }: { item: Artifact }) => (
-    <TouchableOpacity style={styles.gridItem}>
+    <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('ArtifactDetail', { artifact: item })}>
       <Image source={item.image_url} style={styles.gridImage} resizeMode="cover" />
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.7)']}
