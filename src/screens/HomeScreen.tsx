@@ -577,6 +577,8 @@ const styles = StyleSheet.create({
   carouselWrapper: {
     marginVertical: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   // Removed old carousel styles - now using CarouselCards component styles
   bottomNav: {

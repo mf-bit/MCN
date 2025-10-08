@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = Math.min(280, width * 0.8);
 
 const LikeIcon = () => (
   <Svg width={20} height={18} viewBox="0 0 20 18" fill="none">
@@ -78,7 +81,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    width: 300,
+    width: CARD_WIDTH,
     height: 367,
     borderRadius: 28,
     overflow: 'hidden',
@@ -89,9 +92,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     flexDirection: 'column',
     justifyContent: 'space-between',
+    backgroundColor: '#1E1E1E', // Fond sombre pour les espaces vides
   },
   backgroundImage: {
     borderRadius: 28,
+    resizeMode: 'contain',
+    width: '100%',
+    height: '100%',
   },
   topContainer: {
     display: 'flex',
@@ -129,7 +136,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   seeMoreButton: {
-    width: 220,
+    width: Math.min(220, CARD_WIDTH * 0.7), // S'adapte à la largeur de la carte
     height: 60,
     overflow: 'hidden',
     borderRadius: 999999,

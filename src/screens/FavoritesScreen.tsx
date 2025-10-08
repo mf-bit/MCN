@@ -44,3 +44,5 @@ const styles = StyleSheet.create({
   removeBtn: { paddingHorizontal: spacing[3], justifyContent: 'center' },
   removeText: { color: '#c00' },
 });
+
+

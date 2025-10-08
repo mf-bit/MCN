@@ -3,9 +3,9 @@ import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { CarouselCard } from './CarouselCard';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = 300;
-const CARD_SPACING = 25;
-const SCALE_FACTOR = 0.83;
+const CARD_WIDTH = Math.min(280, width * 0.8); // Largeur plus petite pour mobile
+const CARD_SPACING = 20; // Espacement fixe plus petit
+const SCALE_FACTOR = 0.85;
 
 interface CarouselProps {
   data: Array<{
@@ -75,7 +75,7 @@ export const Carousel: React.FC<CarouselProps> = ({ data, onCardPress, onSeeMore
 
     return {
       transform: [
-        { translateX: position === 'center' ? 0 : Animated.add(baseTransform, new Animated.Value(translateX)) },
+        { translateX: Animated.add(baseTransform, new Animated.Value(translateX)) },
         { scale },
       ],
       zIndex,
@@ -110,12 +110,15 @@ export const Carousel: React.FC<CarouselProps> = ({ data, onCardPress, onSeeMore
 
 const styles = StyleSheet.create({
   container: {
-    width: width,
+    width: '100%',
     height: 367,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   cardContainer: {
     position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
