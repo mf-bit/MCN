@@ -18,8 +18,8 @@ import { artifacts as allArtifacts } from '../data/artifacts';
 import { RootStackParamList } from '../../App';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { useI18n } from '../utils/i18n';
-import { StaticCards } from '../components/StaticCards';
-import { CardData } from '../components/Card';
+import { Carousel } from '../components/Carousel';
+import { CarouselItemProps } from '../types/CarouselItemProps';
 
 import Svg, { Path } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,7 +70,7 @@ const categories = [
 ];
 
 // Carousel data for the new 3-card carousel
-const carouselData: CardData[] = [
+const carouselData = [
   {
     id: '1',
     title: 'African Heritage',
@@ -210,13 +210,13 @@ export default function HomeScreen({ navigation }: Props) {
         // Already on home
         break;
       case 'favorites':
-        navigation.navigate('Favorites' as never);
+        navigation.navigate('Favorites');
         break;
       case 'scan':
-        navigation.navigate('QRScan' as never);
+        navigation.navigate('QRScan');
         break;
       case 'museum':
-        navigation.navigate('Museum3D' as never);
+        navigation.navigate('Museum3D');
         break;
     }
   };
@@ -240,7 +240,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => navigation.navigate('Settings' as never)}
+            onPress={() => navigation.navigate('Settings')}
           >
             <View style={styles.profileImage}>
               <Text style={styles.profileText}>M</Text>
@@ -291,18 +291,31 @@ export default function HomeScreen({ navigation }: Props) {
           ))}
         </ScrollView>
 
-        {/* Static Cards */}
+        {/* Animated Carousel */}
+        {/* Carousel */}
         <View style={styles.carouselWrapper}>
-          <StaticCards
-            data={carouselData}
-            onCardPress={(card: CardData) => {
-              navigation.navigate('ArtifactListing', {
-                category: card.id
-              });
-              console.log('Carousel card pressed:', card.title);
+          <Carousel
+            data={allArtifacts.slice(0, 5).map((artifact: Artifact): CarouselItemProps => ({
+              id: artifact.id,
+              title: artifact.name,
+              description: artifact.description,
+              image: artifact.image_url
+            }))}
+            onCardPress={(id: string) => {
+              const artifact = allArtifacts.find((a: any) => a.id === id);
+              if (artifact) {
+                navigation.navigate('ArtifactListing', {
+                  category: artifact.category
+                });
+              }
             }}
-            />
-            </View>
+            onSeeMore={() => {
+              navigation.navigate('ArtifactListing', {
+                category: 'all'
+              });
+            }}
+          />
+        </View>
 
 
 

@@ -34,7 +34,13 @@ export type RootStackParamList = {
   ArtifactDetail: { artifact: import('./src/types/Artifact').Artifact };
   Favorites: undefined;
   Museum3D: undefined;
-
+  Settings: undefined;
+  QRScan: undefined;
+  HistoryTimeline: undefined;
+  Griot: undefined;
+  Artwork3D: undefined;
+  ARNavigation: undefined;
+  ReserveVisit: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
