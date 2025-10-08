@@ -88,15 +88,15 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    paddingVertical: 15,
-    paddingHorizontal: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     flexDirection: 'column',
     justifyContent: 'space-between',
     backgroundColor: '#1E1E1E', // Fond sombre pour les espaces vides
   },
   backgroundImage: {
     borderRadius: 28,
-    resizeMode: 'contain',
+    resizeMode: 'stretch',
     width: '100%',
     height: '100%',
   },
