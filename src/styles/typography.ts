@@ -1,6 +1,11 @@
 import { colors } from './colors';
 
 export const typography = {
+  fontFamily: {
+    regular: 'Roboto', // Regular font for common text
+    special: 'MadimiOne_400Regular', // Special font for slogans and important text
+  },
+  
   // Font sizes
   fontSize: {
     xs: 12,

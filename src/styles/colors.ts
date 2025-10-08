@@ -24,7 +24,7 @@ export const colors = {
     500: '#666666',  // Charcoal
     600: '#4d4d4d',  // Dark charcoal
     700: '#333333',  // Very dark gray
-    800: '#1a1a1a',  // Almost black
+    800: '#1E1E1E',  // Almost black
     900: '#000000',  // Pure black
   },
   
@@ -58,19 +58,19 @@ export const colors = {
   
   // Background colors
   background: {
-    primary: '#fdf6f0',      // Light cream background
+    primary: '#F7F7F7',      // Light gray background
     secondary: '#ffffff',    // White
     tertiary: '#f8e6d3',     // Soft beige
-    dark: '#1a1a1a',         // Dark background
+    dark: '#1E1E1E',         // Dark background
   },
   
   // Text colors
   text: {
-    primary: '#2c1810',      // Dark brown
-    secondary: '#5d3f1c',    // Medium brown
+    primary: '#1E1E1E',      // Dark black
+    secondary: '#848587',    // Gray
     tertiary: '#9d6b2f',     // Light brown
-    light: '#fdf6f0',        // Light text
-    muted: '#b8823a',        // Muted text
+    light: '#F7F7F7',        // Light text
+    muted: '#848587',        // Muted text
   },
   
   // Status colors

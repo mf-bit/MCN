@@ -7,12 +7,12 @@ export const commonStyles = {
   // Container styles
   container: {
     flex: 1,
-    backgroundColor: '#fdf6f0', // colors.background.primary
+    backgroundColor: '#F7F7F7', // colors.background.primary
   },
   
   safeContainer: {
     flex: 1,
-    backgroundColor: '#fdf6f0',
+    backgroundColor: '#F7F7F7',
     paddingTop: 60, // Status bar height
   },
   
@@ -74,7 +74,7 @@ export const commonStyles = {
   // Navigation styles
   navbar: {
     flexDirection: 'row' as const,
-    backgroundColor: '#1a1a1a', // colors.secondary[800]
+    backgroundColor: '#1E1E1E', // colors.secondary[800]
     borderRadius: 30,
     marginHorizontal: 16,
     marginBottom: 20,

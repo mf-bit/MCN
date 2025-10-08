@@ -113,14 +113,14 @@ export default function ArtifactDetailScreen({ route }: Props) {
       </View>
 
       {/* Video Player */}
-      <View style={styles.videoSection}>
+      {/* <View style={styles.videoSection}>
         <Video
           source={{ uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
           style={styles.video}
           useNativeControls
           resizeMode="contain"
         />
-      </View>
+      </View> */}
 
       {/* Description - Centered */}
       <View style={styles.descriptionSection}>
@@ -181,13 +181,14 @@ export default function ArtifactDetailScreen({ route }: Props) {
             <Text style={styles.optionSubtitle}>Commentaire audio</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('HistoryTimeline' as never, { artifactName: artifact.name } as never)}>
+          {/* <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('HistoryTimeline' as never, { artifactName: artifact.name } as never)}>
             <View style={styles.optionIconContainer}>
               <ARIcon size={24} color={colors.primary[600]} />
             </View>
             <Text style={styles.optionTitle}>Timeline</Text>
             <Text style={styles.optionSubtitle}>Voir le contexte</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          
           
           <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('Artwork3D' as never)}>
             <View style={styles.optionIconContainer}>

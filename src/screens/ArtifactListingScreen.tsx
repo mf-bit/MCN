@@ -128,10 +128,6 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
         ))}
       </ScrollView>
 
-      <View style={styles.picassoBar}>
-        <Text style={styles.picassoText}>PICASSO À DAKAR</Text>
-      </View>
-
       <FlatList
         data={artifacts}
         renderItem={renderArtifact}

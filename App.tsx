@@ -16,17 +16,42 @@ import Artwork3DScreen from './src/screens/Artwork3DScreen';
 import ARNavigationScreen from './src/screens/ARNavigationScreen';
 import ReserveVisitScreen from './src/screens/ReserveVisitScreen';
 
+
+import { useFonts } from 'expo-font';
+import {
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+import { MadimiOne_400Regular } from '@expo-google-fonts/madimi-one';
+
+
 export type RootStackParamList = {
   Home: undefined;
   ArtifactListing: { category: string };
   ArtifactDetail: { artifact: import('./src/types/Artifact').Artifact };
   Favorites: undefined;
   Museum3D: undefined;
+
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  let [fontsLoaded] = useFonts({
+    Poppins_300Light,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    MadimiOne_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return null; // or a loading screen
+  }
   return (
     <I18nProvider>
       <FavoritesProvider>
