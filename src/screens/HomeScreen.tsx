@@ -20,6 +20,7 @@ import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { useI18n } from '../utils/i18n';
 import { Carousel } from '../components/Carousel';
 import { CarouselItemProps } from '../types/CarouselItemProps';
+import { BottomNavigation } from '../components/BottomNavigation';
 
 import Svg, { Path } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -320,56 +321,7 @@ export default function HomeScreen({ navigation }: Props) {
 
 
         {/* Bottom Navigation */}
-        <View style={styles.bottomNav}>
-          <TouchableOpacity 
-            style={[
-              styles.navButton,
-              activeNavItem === 'home' && styles.navButtonActive
-            ]}
-            onPress={() => handleNavPress('home')}
-          >
-            <HomeIcon 
-              color={activeNavItem === 'home' ? '#1E1E1E' : '#F7F7F7'} 
-              size={21} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[
-              styles.navButton,
-              activeNavItem === 'favorites' && styles.navButtonActive
-            ]}
-            onPress={() => handleNavPress('favorites')}
-          >
-            <LikeIcon 
-              color={activeNavItem === 'favorites' ? '#1E1E1E' : '#F7F7F7'} 
-              size={20} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[
-              styles.navButton,
-              activeNavItem === 'scan' && styles.navButtonActive
-            ]}
-            onPress={() => handleNavPress('scan')}
-          >
-            <QRIcon 
-              color={activeNavItem === 'scan' ? '#1E1E1E' : '#F7F7F7'} 
-              size={19} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[
-              styles.navButton,
-              activeNavItem === 'museum' && styles.navButtonActive
-            ]}
-            onPress={() => handleNavPress('museum')}
-          >
-            <MuseumIcon 
-              color={activeNavItem === 'museum' ? '#1E1E1E' : '#F7F7F7'} 
-              size={19} 
-            />
-          </TouchableOpacity>
-        </View>
+        <BottomNavigation navigation={navigation} activeTab={activeNavItem} />
       </ScrollView>
 
       {/* Search Overlay Modal */}

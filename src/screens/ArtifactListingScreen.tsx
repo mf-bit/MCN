@@ -16,6 +16,7 @@ import { useI18n } from '../utils/i18n';
 import { Artifact } from '../types/Artifact';
 import { artifacts as allArtifacts } from '../data/artifacts';
 import { RootStackParamList } from '../../App';
+import { BottomNavigation } from '../components/BottomNavigation';
 
 type ArtifactListingScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -138,35 +139,7 @@ export default function ArtifactListingScreen({ navigation, route }: Props) {
         showsVerticalScrollIndicator={false}
       />
 
-      <View style={styles.navbar}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate('Favorites')}
-        >
-          <Text style={styles.navIcon}>❤️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => {
-            // Menu d'options pour QR, upload, ou photo
-            console.log('Options scan/upload/photo');
-          }}
-        >
-          <Text style={styles.navIcon}>📷</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate('Museum3D')}
-        >
-          <Text style={styles.navIcon}>🏛️</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavigation navigation={navigation} activeTab="home" />
     </View>
   );
 }
